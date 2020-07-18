@@ -3,6 +3,16 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Solution Description
+![](screen_shot.png)
+
+I tried a few methods to tune this controller.
+My first attempt was to use the python simulator with the 'twiddle' algorithm to optimize the parameters. The parameters that were generated from the lesson created a system that overcorrected into a state of instability. Parameters like driving speed and max steering angle could be adjusted to better replicate the conditions in the simulator. I realized that, while twiddle reduces total error, the solution is likely not ideal as a passenger. It results in steep, underdamped oscillations that would be highly uncomfortable and unnecessary in most scenarios. From the previous trajectory generation project, it is likely that this path would void the curvature and jerk constraints. Ideally, we could set some constraints on the path during 'twiddle' to prefer overdamped paths that are smooth rather than underdamped paths that oscillate and are uncomfortable.
+
+
+The other method I used to tune was simply by manual (not twiddle) trial and error. I followed steps described [here](https://robotics.stackexchange.com/questions/167/what-are-good-strategies-for-tuning-pid-loops) that instruct to first build a stable PD controller before introducing the integral component. During this process, I found that a minimum proportional value is needed to properly steer around the corners on the track at a given speed. If this value is too small, the vehicle doesn't correct enough and drives off the outside edge of the turn. If its too large, it oscillates once it enters the turn and eventually crashes. I found reducing the speed was helpful to maintain stability around tight corners (I reduced the set speed to 0.13). Although this is not ideal in a scenario where speed is prioritized, considering comfortable driving conditions is necessary in an autonomous vehicle carrying humans, and therefore it is natural to reduce speed in sharp corners. Ideally the trajectory would reduce speed on high curvature areas automatically. Once the PD controller was smooth and strong enough to corner at the set speed, I introduced a relatively small integral coefficient to correct for constant error. Too strong of an integral component and the vehicle will oscillate, but reducing this value provided just enough pull to bring the car back to the lane center.
+
+
 ## Dependencies
 
 * cmake >= 3.5
@@ -19,7 +29,7 @@ Self-Driving Car Engineer Nanodegree Program
   * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
@@ -33,7 +43,7 @@ Fellow students have put together a guide to Windows set-up for the project [her
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+4. Run it: `./pid`.
 
 Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 
@@ -63,36 +73,3 @@ for instructions and the project rubric.
 
 * You don't have to follow this directory structure, but if you do, your work
   will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
